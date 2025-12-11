@@ -1,7 +1,17 @@
 package com.example.urfu.ui
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,11 +29,7 @@ fun MovieDetailsScreen(movieId: String?, movies: List<Movie>) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-
-            Text(
-                text = it.title,
-                style = MaterialTheme.typography.headlineLarge
-            )
+            Text(text = it.title, style = MaterialTheme.typography.headlineLarge)
 
             Divider()
 
@@ -45,10 +51,7 @@ fun MovieDetailsScreen(movieId: String?, movies: List<Movie>) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 it.actors.forEach { actor ->
-                    AssistChip(
-                        onClick = { /* можно добавить действие */ },
-                        label = { Text(actor) }
-                    )
+                    AssistChip(onClick = { }, label = { Text(actor) })
                 }
             }
 
