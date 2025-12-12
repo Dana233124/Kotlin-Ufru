@@ -7,16 +7,20 @@ import retrofit2.http.Query
 @Serializable
 data class ApiTitle(
     val id: String,
-    val type: String? = null,
-    val primaryTitle: String? = null,
-    val originalTitle: String? = null,
-    val startYear: Int? = null,
-    val endYear: Int? = null,
-    val runtimeSeconds: Int? = null,
-    val genres: List<String> = emptyList(),
-    val plot: String? = null,
-    val primaryImage: PrimaryImage? = null,
-    val rating: Rating? = null
+    val primaryTitle: String?,
+    val originalTitle: String?,
+    val plot: String?,
+    val startYear: Int?,
+    val endYear: Int?,
+    val runtimeSeconds: Int?,
+    val genres: List<String>?,
+    val rating: Rating?
+)
+
+@Serializable
+data class Rating(
+    val aggregateRating: Double? = null,
+    val voteCount: Int? = null
 )
 
 @Serializable
@@ -24,12 +28,6 @@ data class PrimaryImage(
     val url: String,
     val width: Int? = null,
     val height: Int? = null
-)
-
-@Serializable
-data class Rating(
-    val aggregateRating: Double? = null,
-    val voteCount: Int? = null
 )
 
 @Serializable

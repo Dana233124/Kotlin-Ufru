@@ -1,64 +1,66 @@
 package com.example.urfu.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.urfu.GetMoviesUseCase
-import com.example.urfu.SearchMoviesUseCase
+import com.example.urfu.datastore.getFilters
 import com.example.urfu.model.Movie
+import com.example.urfu.repository.MovieRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 data class MoviesState(
-    val isLoading: Boolean = false,
     val movies: List<Movie> = emptyList(),
+    val isLoading: Boolean = false,
     val error: String? = null
 )
 
 class MoviesViewModel(
-    private val getMoviesUseCase: GetMoviesUseCase,
-    private val searchMoviesUseCase: SearchMoviesUseCase
+    private val repository: MovieRepository,
+    private val context: Context
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(MoviesState(isLoading = true))
-    val state: StateFlow<MoviesState> = _state
+    private val _state = MutableStateFlow(MoviesState())
+    val state: StateFlow<MoviesState> = _state.asStateFlow()
 
     init {
-        loadMovies()
-    }
-
-    fun loadMovies() {
-        _state.value = MoviesState(isLoading = true)
+        // Загружаем сохранённые фильтры при старте
         viewModelScope.launch {
-            try {
-                val movies = getMoviesUseCase()
-                _state.value = MoviesState(movies = movies)
-            } catch (e: Exception) {
-                _state.value = MoviesState(error = e.message ?: "Unknown error")
+            getFilters(context).collect { (genre, title, rating) ->
+                loadMoviesWithFilters(genre, rating, title)
             }
         }
     }
 
-    fun search(text: String) {
-        if (text.isBlank()) {
-            loadMovies()
-            return
-        }
-
-        _state.value = MoviesState(isLoading = true)
+    fun loadMoviesWithFilters(genre: String?, rating: Float?, title: String?) {
         viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
             try {
-                val movies = searchMoviesUseCase(text)
+                val movies = repository.getMoviesWithFilters(genre, rating, title)
                 _state.value = MoviesState(movies = movies)
             } catch (e: Exception) {
-                _state.value = MoviesState(error = e.message ?: "Search error")
+                _state.value = MoviesState(error = e.message)
             }
         }
     }
 
-    fun toggleFavorite(movieId: String) {
+    fun search(query: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoading = true)
+            try {
+                val movies = repository.searchMovies(query)
+                _state.value = MoviesState(movies = movies)
+            } catch (e: Exception) {
+                _state.value = MoviesState(error = e.message)
+            }
+        }
+    }
+
+    fun toggleFavorite(id: String) {
         val updated = _state.value.movies.map {
-            if (it.id == movieId) it.copy(isFavorite = !it.isFavorite) else it
+            if (it.id == id) it.copy(isFavorite = !it.isFavorite) else it
         }
         _state.value = _state.value.copy(movies = updated)
     }

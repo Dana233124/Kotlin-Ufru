@@ -24,7 +24,8 @@ class MovieRepository {
             country = "Unknown",
             genre = apiTitle.genres?.joinToString(", ") ?: "Unknown",
             screenplay = "",
-            isFavorite = false
+            isFavorite = false,
+            rating = apiTitle.rating?.aggregateRating?.toFloat()
         )
     }
 
@@ -33,7 +34,6 @@ class MovieRepository {
     }
 
     suspend fun searchMovies(query: String): List<Movie> = withContext(Dispatchers.IO) {
-
         api.getTitles().titles
             .filter { it.primaryTitle?.contains(query, ignoreCase = true) == true }
             .map { map(it) }
@@ -46,5 +46,25 @@ class MovieRepository {
         } catch (e: Exception) {
             null
         }
+    }
+
+
+    suspend fun getMoviesWithFilters(
+        genre: String?,
+        minRating: Float?,
+        title: String?
+    ): List<Movie> = withContext(Dispatchers.IO) {
+        val response = api.getTitles(
+            genres = genre?.let { listOf(it) },
+            minAggregateRating = minRating
+        )
+
+        val filtered = response.titles.map { map(it) }
+            .filter { movie ->
+                (minRating == null || (movie.rating ?: 0f) >= minRating) &&
+                        (title.isNullOrBlank() || movie.title.contains(title, ignoreCase = true))
+            }
+
+        filtered
     }
 }
