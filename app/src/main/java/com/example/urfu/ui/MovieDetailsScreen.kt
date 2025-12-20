@@ -41,6 +41,7 @@ fun MovieDetailsScreen(movieId: String?, movies: List<Movie>) {
             InfoRow(label = "Studio", value = it.studio)
             InfoRow(label = "Budget", value = "$${it.budget}")
             InfoRow(label = "Revenue", value = "$${it.revenue}")
+            InfoRow(label = "Rating", value = it.rating?.toString() ?: "N/A") // 🔥 добавлено
 
             Divider()
 

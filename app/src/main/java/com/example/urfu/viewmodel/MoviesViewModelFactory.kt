@@ -1,18 +1,18 @@
 package com.example.urfu.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.urfu.GetMoviesUseCase
-import com.example.urfu.SearchMoviesUseCase
+import com.example.urfu.repository.MovieRepository
 
 class MoviesViewModelFactory(
-    private val getMoviesUseCase: GetMoviesUseCase,
-    private val searchMoviesUseCase: SearchMoviesUseCase
+    private val repository: MovieRepository,
+    private val context: Context
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MoviesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return MoviesViewModel(getMoviesUseCase, searchMoviesUseCase) as T
+            return MoviesViewModel(repository, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -13,5 +13,6 @@ data class Movie(
     val country: String,
     val genre: String,
     val screenplay: String,
-    val isFavorite: Boolean = false
+    val isFavorite: Boolean = false,
+    val rating: Float? = null
 )
