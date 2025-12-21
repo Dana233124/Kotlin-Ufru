@@ -3,6 +3,7 @@ package com.example.urfu.ui.components
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -43,5 +44,12 @@ fun BottomNavigationBar(navController: NavController) {
             icon = { Icon(Icons.Default.Favorite, contentDescription = "Favorites") },
             label = { Text("Favorites") }
         )
+        NavigationBarItem(
+            selected = currentRoute == "profile",
+            onClick = { navController.navigate("profile") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+            label = { Text("Профиль") }
+        )
+
     }
 }
