@@ -1,6 +1,11 @@
 package com.example.urfu.profile.presentation
 
+import android.app.AlarmManager
+import android.app.TimePickerDialog
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -29,12 +34,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import java.io.File
+import java.util.Calendar
 
 @Composable
 fun EditProfileScreen(
@@ -47,9 +55,12 @@ fun EditProfileScreen(
     var resumeUrl by remember { mutableStateOf("") }
     var avatarUri by remember { mutableStateOf("") }
 
+    var favoriteTime by remember { mutableStateOf("") }
+    var timeError by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+
     var showSourceDialog by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
-
 
     val cameraFile = File(context.externalCacheDir, "camera_photo.jpg")
     val cameraUri: Uri = FileProvider.getUriForFile(
@@ -61,26 +72,44 @@ fun EditProfileScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { success ->
+        Log.d("DEBUG", "Camera result: success=$success")
         if (success) avatarUri = cameraUri.toString()
     }
-
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
+        Log.d("DEBUG", "Gallery result: uri=$uri")
         uri?.let { avatarUri = it.toString() }
     }
 
     fun openGallery() {
+        Log.d("DEBUG", "Opening gallery")
         galleryLauncher.launch("image/*")
     }
 
+    val isSaveEnabled = !timeError && favoriteTime.isNotBlank()
+
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                vm.save(name, resumeUrl, avatarUri, onDone)
-            }) {
-                Icon(Icons.Default.Check, contentDescription = "Сохранить")
+            Box(
+                modifier = Modifier.alpha(if (isSaveEnabled) 1f else 0.4f)
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        Log.d(
+                            "DEBUG",
+                            "FAB clicked. isSaveEnabled=$isSaveEnabled time=$favoriteTime"
+                        )
+
+                        if (isSaveEnabled) {
+                            vm.save(name, resumeUrl, avatarUri, onDone)
+                            scheduleNotification(context, name, favoriteTime)
+                        }
+                    }
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = "Сохранить")
+                }
             }
         }
     ) { padding ->
@@ -95,7 +124,10 @@ fun EditProfileScreen(
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clickable { showSourceDialog = true },
+                    .clickable {
+                        Log.d("DEBUG", "Avatar box clicked, showing source dialog")
+                        showSourceDialog = true
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 if (avatarUri.isNotBlank()) {
@@ -131,13 +163,59 @@ fun EditProfileScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(Modifier.height(12.dp))
+
+            // Время любимой пары
+            OutlinedTextField(
+                value = favoriteTime,
+                onValueChange = {
+                    favoriteTime = it
+                    timeError = !isValidTime(it)
+                    Log.d("DEBUG", "Time changed: $it valid=${!timeError}")
+                },
+                label = { Text("Время любимой пары (HH:mm)") },
+                isError = timeError,
+                trailingIcon = {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Выбрать время",
+                        modifier = Modifier.clickable {
+                            Log.d("DEBUG", "Opening TimePicker")
+                            showTimePicker = true
+                        }
+                    )
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            if (timeError) {
+                Text("Введите время в формате HH:mm", color = Color.Red)
+            }
+
+            if (showTimePicker) {
+                TimePickerDialog(
+                    context,
+                    { _, hour, minute ->
+                        val formatted = String.format("%02d:%02d", hour, minute)
+                        Log.d("DEBUG", "TimePicker selected: $formatted")
+                        favoriteTime = formatted
+                        timeError = false
+                    },
+                    12, 0, true
+                ).show()
+                showTimePicker = false
+            }
+
+            // Диалоги выбора фото
             if (showSourceDialog) {
                 showImageSourceDialog(
                     onGallery = {
+                        Log.d("DEBUG", "Gallery selected in dialog")
                         showSourceDialog = false
                         showPermissionDialog = true
                     },
                     onCamera = {
+                        Log.d("DEBUG", "Camera selected in dialog")
                         showSourceDialog = false
                         cameraLauncher.launch(cameraUri)
                     }
@@ -152,10 +230,11 @@ fun EditProfileScreen(
                         Text("Приложению нужен доступ к вашим фото, чтобы выбрать аватар. Разрешить?")
                     },
                     confirmButton = {
-                        androidx.compose.material3.Text(
+                        Text(
                             text = "Да",
                             modifier = Modifier
                                 .clickable {
+                                    Log.d("DEBUG", "Permission dialog: Yes")
                                     showPermissionDialog = false
                                     openGallery()
                                 }
@@ -163,10 +242,11 @@ fun EditProfileScreen(
                         )
                     },
                     dismissButton = {
-                        androidx.compose.material3.Text(
+                        Text(
                             text = "Нет",
                             modifier = Modifier
                                 .clickable {
+                                    Log.d("DEBUG", "Permission dialog: No")
                                     showPermissionDialog = false
                                     onDone()
                                 }
@@ -177,6 +257,64 @@ fun EditProfileScreen(
             }
         }
     }
+}
+
+fun isValidTime(text: String): Boolean {
+    return Regex("^([01]\\d|2[0-3]):[0-5]\\d$").matches(text)
+}
+
+fun scheduleNotification(context: Context, name: String, time: String) {
+    Log.d("DEBUG", "scheduleNotification called with time=$time")
+
+    val parts = time.split(":")
+    if (parts.size != 2) {
+        Log.e("DEBUG", "Invalid time format: $time")
+        return
+    }
+
+    val hour = parts[0].toIntOrNull()
+    val minute = parts[1].toIntOrNull()
+
+    if (hour == null || minute == null) {
+        Log.e("DEBUG", "Cannot parse time: $time")
+        return
+    }
+
+    Log.d("DEBUG", "Parsed hour=$hour minute=$minute")
+
+    val calendar = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+
+        if (before(Calendar.getInstance())) {
+            add(Calendar.DAY_OF_YEAR, 1)
+        }
+    }
+
+    Log.d("DEBUG", "Alarm scheduled for: ${calendar.time}")
+
+    val intent = Intent(context, PairReceiver::class.java).apply {
+        putExtra("name", name)
+    }
+
+    val pending = android.app.PendingIntent.getBroadcast(
+        context,
+        1001,
+        intent,
+        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+    )
+
+    val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+    // Гарантированное срабатывание
+    alarm.setAlarmClock(
+        AlarmManager.AlarmClockInfo(calendar.timeInMillis, pending),
+        pending
+    )
+
+    Log.d("DEBUG", "Alarm setAlarmClock called")
 }
 
 @Composable
