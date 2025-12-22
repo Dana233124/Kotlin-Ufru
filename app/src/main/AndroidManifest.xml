@@ -38,8 +38,7 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <!-- ❗ ОБЯЗАТЕЛЬНО: Receiver для уведомлений -->
-        <receiver android:name=".profile.presentation.PairReceiver" />
+
 
     </application>
 

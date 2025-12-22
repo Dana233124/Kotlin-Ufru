@@ -1,7 +1,7 @@
-package com.example.urfu.profile.data
+package com.example.urfu.profile.presentation.data
 
 import android.content.Context
-import com.example.urfu.profile.domain.ProfileRepository
+import com.example.urfu.profile.presentation.domain.ProfileRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

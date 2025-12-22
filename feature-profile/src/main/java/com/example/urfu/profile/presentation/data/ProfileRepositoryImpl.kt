@@ -1,7 +1,7 @@
-package com.example.urfu.profile.data
+package com.example.urfu.profile.presentation.data
 
-import com.example.urfu.profile.domain.Profile
-import com.example.urfu.profile.domain.ProfileRepository
+import com.example.urfu.profile.presentation.domain.Profile
+import com.example.urfu.profile.presentation.domain.ProfileRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

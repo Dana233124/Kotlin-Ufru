@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Kotlin"
 include(":app")
+include(":feature-profile")

@@ -2,8 +2,8 @@ package com.example.urfu.profile.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.urfu.profile.domain.Profile
-import com.example.urfu.profile.domain.ProfileRepository
+import com.example.urfu.profile.presentation.domain.Profile
+import com.example.urfu.profile.presentation.domain.ProfileRepository
 
 
 import dagger.hilt.android.lifecycle.HiltViewModel

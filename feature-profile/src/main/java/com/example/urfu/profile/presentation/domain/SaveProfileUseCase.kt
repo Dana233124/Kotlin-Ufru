@@ -1,4 +1,4 @@
-package com.example.urfu.profile.domain
+package com.example.urfu.profile.presentation.domain
 
 import javax.inject.Inject
 

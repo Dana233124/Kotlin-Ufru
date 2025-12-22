@@ -1,10 +1,12 @@
-package com.example.urfu.profile.data
+package com.example.urfu.profile.presentation.data
 
 import android.content.Context
+
 import androidx.datastore.preferences.core.edit
+
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.urfu.profile.domain.Profile
+import com.example.urfu.profile.presentation.domain.Profile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
