@@ -17,6 +17,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.urfu.cache.FilterBadgeCache
+import com.example.urfu.profile.presentation.EditProfileScreen
+import com.example.urfu.profile.presentation.ProfileScreen
 import com.example.urfu.repository.MovieRepository
 import com.example.urfu.ui.FavoritesScreen
 import com.example.urfu.ui.FilterScreen
@@ -39,7 +41,7 @@ fun NavGraph() {
     val state by vm.state.collectAsState()
     val currentRoute = navController.currentBackStackEntry?.destination?.route
 
-    // 🔥 общий кэш для бейджа
+
     val cache = remember { FilterBadgeCache() }
 
     Scaffold(
@@ -84,6 +86,17 @@ fun NavGraph() {
                                 },
                                 onBack = { navController.popBackStack() },
                                 cache = cache
+                            )
+                        }
+                        composable("profile") {
+                            ProfileScreen(
+                                onEdit = { navController.navigate("profile/edit") }
+                            )
+                        }
+
+                        composable("profile/edit") {
+                            EditProfileScreen(
+                                onDone = { navController.popBackStack() }
                             )
                         }
                     }
