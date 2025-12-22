@@ -9,8 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.example.urfu.MainActivity
-import com.example.urfu.R
+
 
 class PairReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -32,19 +31,20 @@ class PairReceiver : BroadcastReceiver() {
             Log.d("DEBUG", "Notification channel created/exists")
         }
 
-        val openIntent = Intent(context, MainActivity::class.java)
-        val pending = PendingIntent.getActivity(
+        val launchIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val pendingIntent = PendingIntent.getActivity(
             context,
             0,
-            openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            launchIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
+
 
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle("Начинается пара!")
             .setContentText("$name, пора на любимую пару")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(pending)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
 

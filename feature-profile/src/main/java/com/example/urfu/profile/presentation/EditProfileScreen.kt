@@ -1,6 +1,8 @@
 package com.example.urfu.profile.presentation
 
+
 import android.app.AlarmManager
+import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -299,11 +301,11 @@ fun scheduleNotification(context: Context, name: String, time: String) {
         putExtra("name", name)
     }
 
-    val pending = android.app.PendingIntent.getBroadcast(
+    val pending = PendingIntent.getBroadcast(
         context,
         1001,
         intent,
-        android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
 
     val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

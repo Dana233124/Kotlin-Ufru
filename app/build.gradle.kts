@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.urfu"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -47,7 +47,7 @@ android {
 }
 
 dependencies {
-
+    implementation(project(":feature-profile"))
     implementation(platform("androidx.compose:compose-bom:2024.02.00"))
 
 
